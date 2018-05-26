@@ -31,9 +31,14 @@ function doPost(e) {
         if (!postData || (!isConversationStartEvent(postData) && !isMessageEvent(postData))) return;
 
         initializeGlobalParametersIfNeeded();
-        if (isValidMessageType(postData)) {
+      
+      if(isConversationStartEvent(postData)) {
+         sendWelcomeMessage(postData);        
+      } 
+      
+      //if (isValidMessageType(postData)) {
             storeMessage(postData);
-        }
+      //}
 
       sayText("Я прочитал: " + extractTextFromMessage(postData), extractSenderId(postData), gAccessToken, gBotName, gBotAvatar);
 
@@ -81,19 +86,37 @@ function isConversationStartEvent(postData) {
 }
 
 function isValidMessageType(postData) {
-    return isMessageType(postData, 'text');
+    return isMessageType(postData, 'text') 
+            || isMessageType(postData, 'conversation_started');
 }
 
 // ----  Бизнес-логика ----
 
+function createKeyboard(values) {
+  
+  var keyboardGenerator = new KeyboardGenerator();
+  for(var i = 0; i < values.length; i++) {
+    var keyboardValue = values[i];
+    keyboardGenerator.addElement(keyboardValue, (gShouldUseRandomColors ? undefined : gDefaultKeyboardColor));
+  }
+
+  return keyboardGenerator.build();
+}
+
+function sendWelcomeMessage(postData) {
+  var keyboardObject = createKeyboard([gWelcomeStartButton]);
+  sayText(gWelcomeMessage, extractSenderId(postData), gAccessToken, gBotName, gBotAvatar, "", keyboardObject);
+}
+
 function appendMessage(postData) {
     var doc = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = doc.getSheetByName(MESSAGES_SHEET_NAME); // select the messages sheet
+    var event = extractEventType(postData);
     var messageId = extractMessageToken(postData);
     var senderId = extractSenderId(postData);
     var time = extractTimestamp(postData);
     var text = extractTextFromMessage(postData);
-    sheet.appendRow([messageId, senderId, time, text]);
+    sheet.appendRow([event, messageId, senderId, time, text]);
     SpreadsheetApp.flush();
 }
 
@@ -169,7 +192,7 @@ function extractMessageToken(postData) {
     if (!postData) return undefined;
 
     if (postData.message_token) { // Might be a message event
-      return "" + postData.message_token;
+      return Number(postData.message_token).toString();
     }
 
     return undefined;
@@ -180,6 +203,16 @@ function extractTimestamp(postData) {
 
     if (postData.timestamp) { // Might be a message event
         return postData.timestamp;
+    }
+
+    return undefined;
+}
+
+function extractEventType(postData) {
+    if (!postData) return undefined;
+
+    if (postData.event) { // Might be a message event
+        return postData.event;
     }
 
     return undefined;
@@ -220,6 +253,16 @@ function initializeGlobalParametersIfNeeded() {
     gDefaultKeyboardColor = parametersData[8][1];
 }
 
-function FROM_EPOCH(epoch_in_secs) {
-  return new Date(epoch_in_secs);  // Convert to milliseconds
+function FROM_EPOCH(epoch_in_millis) {
+  return new Date(epoch_in_millis);
+}
+
+function randomExcuse(){
+    var result =  UrlFetchApp.fetch('http://programmingexcuses.com');
+  var doc = XmlService.parse(result);
+  var html = doc.getRootElement();
+  
+  var menu = html.getChild('center').getChildText('a');
+  var output = XmlService.getRawFormat().format(menu);
+  return menu;
 }
