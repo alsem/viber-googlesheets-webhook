@@ -32,11 +32,10 @@ function doPost(e) {
         if (!postData || (!isConversationStartEvent(postData) && !isMessageEvent(postData))) return;
 
         initializeGlobalParametersIfNeeded();
-        if (!isTextMessage(postData)) {
-            sendDoNotUnderstandInputMessage(postData);
-        } else {
+        if (isValidMessageType(postData)) {
             storeMessage(postData);
         }
+
         sayText(extractTextFromMessage(postData), gAccessToken, gBotName, gBotAvatar);
 
 
@@ -79,7 +78,7 @@ function isConversationStartEvent(postData) {
     return isEvent(postData, 'conversation_started');
 }
 
-function isTextMessage(postData) {
+function isValidMessageType(postData) {
     return isMessageType(postData, 'text');
 }
 
@@ -98,37 +97,43 @@ function appendMessage(postData) {
 
 // ---- Send messages methods ----
 function sayText(text, userId, authToken, senderName, senderAvatar, trackingData, keyboard) {
+    try {
+        var data = {
+            'type': 'text',
+            'text': text,
+            'receiver': userId,
+            'sender': {
+                'name': senderName,
+                'avatar': senderAvatar
+            },
+            'tracking_data': JSON.stringify(trackingData || {})
+        };
 
-    var data = {
-        'type': 'text',
-        'text': text,
-        'receiver': userId,
-        'sender': {
-            'name': senderName,
-            'avatar': senderAvatar
-        },
-        'tracking_data': JSON.stringify(trackingData || {})
-    };
+        if (keyboard) {
+            data.keyboard = keyboard;
+        }
 
-    if (keyboard) {
-        data.keyboard = keyboard;
+        var options = {
+            'async': true,
+            'crossDomain': true,
+            'method': 'POST',
+            'headers': {
+                'X-Viber-Auth-Token': authToken,
+                'content-type': 'application/json',
+                'cache-control': 'no-cache'
+            },
+            'payload': JSON.stringify(data)
+        };
+
+        Logger.log(options);
+        var result = UrlFetchApp.fetch('https://chatapi.viber.com/pa/send_message', options);
+        Logger.log(result);
+
+    } catch (error) {
+        var errorSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('errors');
+        var cell = errorSheet.getRange('A1').offset(errorSheet.getLastRow(), 0);
+        cell.setValue("function sayText: " + error);
     }
-
-    var options = {
-        'async': true,
-        'crossDomain': true,
-        'method': 'POST',
-        'headers': {
-            'X-Viber-Auth-Token': authToken,
-            'content-type': 'application/json',
-            'cache-control': 'no-cache'
-        },
-        'payload': JSON.stringify(data)
-    };
-
-    Logger.log(options);
-    var result = UrlFetchApp.fetch('https://chatapi.viber.com/pa/send_message', options);
-    Logger.log(result);
 }
 
 // ---- State handling methods ----
