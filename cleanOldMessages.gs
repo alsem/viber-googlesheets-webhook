@@ -4,7 +4,7 @@
 
 var TIMESTAMP_COLUMN = 3;
 var MESSAGES_SHEET = 'messages';
-function clearMessagesOlderThan(days: number) {
+function clearMessagesOlderThan(days) {
     var date = new Date();
     date.setDate(date.getDate() - days);
     var dateOffsetMillis = date.valueOf();

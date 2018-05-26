@@ -19,7 +19,7 @@ var gDefaultKeyboardColor = 'Your default keyboard option color from the paramet
 
 // ---- Post/Get обработчики скрипта, опубликованного в качестве веб-приложения ----
 // noinspection UnusedStatementJS
-function isAcceptableEvent(postData: any) {
+function isAcceptableEvent(postData) {
     return isConversationStartEvent(postData)
         || (isMessageEvent(postData) && isTextMessage(postData))
         || isSubscribedEvent(postData);
