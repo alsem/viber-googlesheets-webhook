@@ -16,7 +16,6 @@ var gDoNotUnderstandMessage = 'Your do not understand input message from the par
 var gShouldUseRandomColors = false;
 var gDefaultKeyboardColor = 'Your default keyboard option color from the parameters sheet';
 
-
 // ---- Post/Get обработчики скрипта, опубликованного в качестве веб-приложения ----
 // noinspection UnusedStatementJS
 // noinspection JSUnusedGlobalSymbols
@@ -36,7 +35,7 @@ function doPost(e) {
             storeMessage(postData);
         }
 
-        sayText(extractTextFromMessage(postData), gAccessToken, gBotName, gBotAvatar);
+      sayText("Я прочитал: " + extractTextFromMessage(postData), extractSenderId(postData), gAccessToken, gBotName, gBotAvatar);
 
 
     } catch (error) {
@@ -139,6 +138,18 @@ function sayText(text, userId, authToken, senderName, senderAvatar, trackingData
     }
 }
 
+//--- Testing mirror message
+function sayHello(){
+  initializeGlobalParametersIfNeeded();
+  try {
+  sayText("Привет, это бот", "A4NRSvHxFcTzrF384i69Qw==", gAccessToken,gBotName,gBotAvatar)
+      } catch (error) {
+        Logger.log(error);
+        var errorSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('errors');
+        var cell = errorSheet.getRange('A1').offset(errorSheet.getLastRow(), 0);
+        cell.setValue("function sayText: " + error);
+    }
+}
 // ---- State handling methods ----
 
 function extractSenderId(postData) {
@@ -158,7 +169,7 @@ function extractMessageToken(postData) {
     if (!postData) return undefined;
 
     if (postData.message_token) { // Might be a message event
-        return "" + postData.message_token;
+      return "" + postData.message_token;
     }
 
     return undefined;
@@ -207,4 +218,8 @@ function initializeGlobalParametersIfNeeded() {
     gDoNotUnderstandMessage = parametersData[6][1];
     gShouldUseRandomColors = parametersData[7][1];
     gDefaultKeyboardColor = parametersData[8][1];
+}
+
+function FROM_EPOCH(epoch_in_secs) {
+  return new Date(epoch_in_secs);  // Convert to milliseconds
 }
