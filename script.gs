@@ -3,6 +3,7 @@
 // Constants
 var PARAMETERS_SHEET_NAME = 'parameters';
 var MESSAGES_SHEET_NAME = 'messages';
+var URL_SEND_MESSAGE = 'https://chatapi.viber.com/pa/send_message';
 
 // Global parameters (Values will be read from the parameters sheet)
 var gDidFillParameters = false;
@@ -18,6 +19,12 @@ var gDefaultKeyboardColor = 'Your default keyboard option color from the paramet
 
 // ---- Post/Get обработчики скрипта, опубликованного в качестве веб-приложения ----
 // noinspection UnusedStatementJS
+function isAcceptableEvent(postData: any) {
+    return isConversationStartEvent(postData)
+        || (isMessageEvent(postData) && isTextMessage(postData))
+        || isSubscribedEvent(postData);
+}
+
 // noinspection JSUnusedGlobalSymbols
 function doPost(e) {
     Logger.log(e);
@@ -28,8 +35,7 @@ function doPost(e) {
         var postData = JSON.parse(e.postData.contents);
         if (!postData) return;
         // Accepting only message/conversation started events
-        if (!(isConversationStartEvent(postData)
-                || isMessageEvent(postData) && isTextMessage(postData))) {
+        if (!(isAcceptableEvent(postData))) {
             return;
         }
 
@@ -87,6 +93,10 @@ function isConversationStartEvent(postData) {
     return isEvent(postData, 'conversation_started');
 }
 
+function isSubscribedEvent(postData) {
+    return isEvent(postData, 'subscribed');
+}
+
 function isTextMessage(postData) {
     return isMessageType(postData, 'text');
 }
@@ -136,7 +146,7 @@ function sayText(text, userId, authToken, senderName, senderAvatar, trackingData
         };
 
         Logger.log(options);
-        var result = UrlFetchApp.fetch('https://chatapi.viber.com/pa/send_message', options);
+        var result = UrlFetchApp.fetch(URL_SEND_MESSAGE, options);
         Logger.log(result);
 
     } catch (error) {
