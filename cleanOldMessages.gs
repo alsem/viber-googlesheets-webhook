@@ -15,7 +15,7 @@ function clearMessagesOlderThan(days) {
 
     for (var i = 2; i <= allmessages.getNumRows(); i++) {
             var timeCol = allmessages.getCell(i, TIMESTAMP_COLUMN);
-            if (dateOffsetMillis >= timeCol) {
+            if (dateOffsetMillis >= timeCol.getValue()) {
                 sheet.deleteRows(2, i-2);
                 break;
             }
