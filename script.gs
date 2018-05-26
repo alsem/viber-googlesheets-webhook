@@ -26,21 +26,23 @@ function doPost(e) {
 
     try {
         var postData = JSON.parse(e.postData.contents);
-
+        if (!postData) return;
         // Accepting only message/conversation started events
-        if (!postData || (!isConversationStartEvent(postData) && !isMessageEvent(postData))) return;
+        if (!(isConversationStartEvent(postData)
+                || isMessageEvent(postData) && isTextMessage(postData))) {
+            return;
+        }
 
         initializeGlobalParametersIfNeeded();
-      
-      if(isConversationStartEvent(postData)) {
-         sendWelcomeMessage(postData);        
-      } 
-      
-      //if (isValidMessageType(postData)) {
-            storeMessage(postData);
-      //}
 
-      sayText("Я прочитал: " + extractTextFromMessage(postData), extractSenderId(postData), gAccessToken, gBotName, gBotAvatar);
+        if (isConversationStartEvent(postData)) {
+            sendWelcomeMessage(postData);
+        }
+
+        storeMessage(postData);
+
+        //зеркалирование сообщения
+        sayText("Я прочитал: " + extractTextFromMessage(postData), extractSenderId(postData), gAccessToken, gBotName, gBotAvatar);
 
 
     } catch (error) {
@@ -85,27 +87,26 @@ function isConversationStartEvent(postData) {
     return isEvent(postData, 'conversation_started');
 }
 
-function isValidMessageType(postData) {
-    return isMessageType(postData, 'text') 
-            || isMessageType(postData, 'conversation_started');
+function isTextMessage(postData) {
+    return isMessageType(postData, 'text');
 }
 
 // ----  Бизнес-логика ----
 
 function createKeyboard(values) {
-  
-  var keyboardGenerator = new KeyboardGenerator();
-  for(var i = 0; i < values.length; i++) {
-    var keyboardValue = values[i];
-    keyboardGenerator.addElement(keyboardValue, (gShouldUseRandomColors ? undefined : gDefaultKeyboardColor));
-  }
 
-  return keyboardGenerator.build();
+    var keyboardGenerator = new KeyboardGenerator();
+    for (var i = 0; i < values.length; i++) {
+        var keyboardValue = values[i];
+        keyboardGenerator.addElement(keyboardValue, (gShouldUseRandomColors ? undefined : gDefaultKeyboardColor));
+    }
+
+    return keyboardGenerator.build();
 }
 
 function sendWelcomeMessage(postData) {
-  var keyboardObject = createKeyboard([gWelcomeStartButton]);
-  sayText(gWelcomeMessage, extractSenderId(postData), gAccessToken, gBotName, gBotAvatar, "", keyboardObject);
+    var keyboardObject = createKeyboard([gWelcomeStartButton]);
+    sayText(gWelcomeMessage, extractSenderId(postData), gAccessToken, gBotName, gBotAvatar, "", keyboardObject);
 }
 
 function appendMessage(postData) {
@@ -162,17 +163,18 @@ function sayText(text, userId, authToken, senderName, senderAvatar, trackingData
 }
 
 //--- Testing mirror message
-function sayHello(){
-  initializeGlobalParametersIfNeeded();
-  try {
-  sayText("Привет, это бот", "A4NRSvHxFcTzrF384i69Qw==", gAccessToken,gBotName,gBotAvatar)
-      } catch (error) {
+function sayHello() {
+    initializeGlobalParametersIfNeeded();
+    try {
+        sayText("Привет, это бот", "A4NRSvHxFcTzrF384i69Qw==", gAccessToken, gBotName, gBotAvatar)
+    } catch (error) {
         Logger.log(error);
         var errorSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('errors');
         var cell = errorSheet.getRange('A1').offset(errorSheet.getLastRow(), 0);
         cell.setValue("function sayText: " + error);
     }
 }
+
 // ---- State handling methods ----
 
 function extractSenderId(postData) {
@@ -192,7 +194,7 @@ function extractMessageToken(postData) {
     if (!postData) return undefined;
 
     if (postData.message_token) { // Might be a message event
-      return Number(postData.message_token).toString();
+        return Number(postData.message_token).toString();
     }
 
     return undefined;
@@ -254,15 +256,15 @@ function initializeGlobalParametersIfNeeded() {
 }
 
 function FROM_EPOCH(epoch_in_millis) {
-  return new Date(epoch_in_millis);
+    return new Date(epoch_in_millis);
 }
 
-function randomExcuse(){
-    var result =  UrlFetchApp.fetch('http://programmingexcuses.com');
-  var doc = XmlService.parse(result);
-  var html = doc.getRootElement();
-  
-  var menu = html.getChild('center').getChildText('a');
-  var output = XmlService.getRawFormat().format(menu);
-  return menu;
+function randomExcuse() {
+    var result = UrlFetchApp.fetch('http://programmingexcuses.com');
+    var doc = XmlService.parse(result);
+    var html = doc.getRootElement();
+
+    var menu = html.getChild('center').getChildText('a');
+    var output = XmlService.getRawFormat().format(menu);
+    return menu;
 }
