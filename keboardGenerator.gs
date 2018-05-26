@@ -15,7 +15,8 @@
 var KEYBOARD_DEFAULT_FONT_COLOR = '#FFFFFF';
 
 var KeyboardGenerator = function() {
-  this.elements = [];
+  // noinspection JSAnnotator
+    this.elements = [];
  
   this.randomColor = function () {
     
@@ -49,7 +50,8 @@ var KeyboardGenerator = function() {
     var addedElements = this.elementToKeyboard(text, backgroundColor || this.randomColor(), 
         fontColor || KEYBOARD_DEFAULT_FONT_COLOR);
 
-    this.elements = this.elements.concat(addedElements);
+    // noinspection JSAnnotator
+      this.elements = this.elements.concat(addedElements);
   }
   
   this.build = function() {

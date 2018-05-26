@@ -42,7 +42,7 @@ function doPost(e) {
         storeMessage(postData);
 
         //зеркалирование сообщения
-        sayText("Я прочитал: " + extractTextFromMessage(postData), extractSenderId(postData), gAccessToken, gBotName, gBotAvatar);
+        sendTextMessage("Я прочитал: " + extractTextFromMessage(postData), extractSenderId(postData));
 
 
     } catch (error) {
@@ -92,22 +92,6 @@ function isTextMessage(postData) {
 }
 
 // ----  Бизнес-логика ----
-
-function createKeyboard(values) {
-
-    var keyboardGenerator = new KeyboardGenerator();
-    for (var i = 0; i < values.length; i++) {
-        var keyboardValue = values[i];
-        keyboardGenerator.addElement(keyboardValue, (gShouldUseRandomColors ? undefined : gDefaultKeyboardColor));
-    }
-
-    return keyboardGenerator.build();
-}
-
-function sendWelcomeMessage(postData) {
-    var keyboardObject = createKeyboard([gWelcomeStartButton]);
-    sayText(gWelcomeMessage, extractSenderId(postData), gAccessToken, gBotName, gBotAvatar, "", keyboardObject);
-}
 
 function appendMessage(postData) {
     var doc = SpreadsheetApp.getActiveSpreadsheet();
@@ -162,6 +146,25 @@ function sayText(text, userId, authToken, senderName, senderAvatar, trackingData
     }
 }
 
+function sendWelcomeMessage(postData) {
+    var keyboardObject = createKeyboard([gWelcomeStartButton]);
+    sendTextMessage(gWelcomeMessage, extractSenderId(postData), keyboardObject);
+}
+
+function sendTextMessage(text, userId, keyboard) {
+    sayText(text, userId, gAccessToken, gBotName, gBotAvatar, null, keyboard);
+}
+
+function createKeyboard(values) {
+
+    var keyboardGenerator = new KeyboardGenerator();
+    for (var i = 0; i < values.length; i++) {
+        var keyboardValue = values[i];
+        keyboardGenerator.addElement(keyboardValue, (gShouldUseRandomColors ? undefined : gDefaultKeyboardColor));
+    }
+
+    return keyboardGenerator.build();
+}
 //--- Testing mirror message
 function sayHello() {
     initializeGlobalParametersIfNeeded();
