@@ -41,6 +41,9 @@ function doPost(e) {
 
     } catch (error) {
         Logger.log(error);
+        var errorSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('errors');
+        var cell = errorSheet.getRange('A1').offset(errorSheet.getLastRow(), 0);
+        cell.setValue("function sayText: " + error);
     }
 }
 
