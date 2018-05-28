@@ -4,22 +4,29 @@
 
 var TIMESTAMP_COLUMN = 3;
 var MESSAGES_SHEET = 'messages';
+//удалить всё до текущей даты минус количество дней
 function clearMessagesOlderThan(days) {
     var date = new Date();
     date.setDate(date.getDate() - days);
-    var dateOffsetMillis = date.valueOf();
-
+    //var dateOffsetMillis = date.valueOf();
+ 
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(MESSAGES_SHEET);
-
-    var allmessages = sheet.getRange('A:F').offset(sheet.getLastRow(), 0);
-
-    for (var i = 2; i <= allmessages.getNumRows(); i++) {
-            var timeCol = allmessages.getCell(i, TIMESTAMP_COLUMN);
-            if (dateOffsetMillis >= timeCol.getValue()) {
-                sheet.deleteRows(2, i-2);
-                break;
-            }
+//получаем диапазон временных меток
+  var allmessages = sheet.getRange('D:D');
+  var lastEarlierDateRow = 2;
+  var lastRow = sheet.getLastRow();
+  for (var i = 2; i <= lastRow; i++) {
+    var timestamp = new Date(allmessages.getCell(i, 1).getValue());      
+    
+    if (timestamp <= date) {
+      //запоминаем номер строки с датой меньше заданной
+      lastEarlierDateRow = i;
+      Logger.log(date + " < " + timestamp);
     }
+  }
+  //удаляем все подходящие строки, не включая заголовки столбцов
+  sheet.deleteRows(2, lastEarlierDateRow);
+  SpreadsheetApp.flush();
 
 }
 
