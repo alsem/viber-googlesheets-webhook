@@ -207,7 +207,7 @@ function extractMessageToken(postData) {
     if (!postData) return undefined;
 
     if (postData.message_token) { // Might be a message event
-        return Number(postData.message_token).toString();
+        return parseInt(postData.message_token).toString();
     }
 
     return undefined;
@@ -217,7 +217,7 @@ function extractTimestamp(postData) {
     if (!postData) return undefined;
 
     if (postData.timestamp) { // Might be a message event
-        return postData.timestamp;
+        return new Date(FROM_EPOCH(postData.timestamp));
     }
 
     return undefined;
@@ -234,7 +234,7 @@ function extractEventType(postData) {
 }
 
 function extractTextFromMessage(postData) {
-    if (!postData || !postData.message) return undefined;
+    if (!postData || !postData.message) return "no_text";
 
     return postData.message.text;
 }
