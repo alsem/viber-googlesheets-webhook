@@ -207,10 +207,10 @@ function extractMessageToken(postData) {
     if (!postData) return undefined;
 
     if (postData.message_token) { // Might be a message event
-        return parseInt(postData.message_token).toString();
+        return parseInt(postData.message_token).toFixed();
     }
 
-    return undefined;
+    return "0";
 }
 
 function extractTimestamp(postData) {
