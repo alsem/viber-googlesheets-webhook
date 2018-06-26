@@ -112,6 +112,8 @@ function appendMessage(postData) {
     var time = extractTimestamp(postData);
     var text = extractTextFromMessage(postData);
     sheet.appendRow([event, messageId, senderId, time, text]);
+    //т.к. сбивается форматирование новой строки, установим его вручную
+    sheet.getRange(sheet.getLastRow(), 2, 1, 1).setNumberFormat('0');
     SpreadsheetApp.flush();
 }
 

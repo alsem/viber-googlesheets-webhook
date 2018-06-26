@@ -32,7 +32,7 @@ function clearMessagesOlderThan(days) {
 
 function clearOldMessages() {
     try {
-        clearMessagesOlderThan(1);
+        clearMessagesOlderThan(2);
     } catch (error) {
         Logger.log(error);
         var errorSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('errors');
