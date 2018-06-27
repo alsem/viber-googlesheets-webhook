@@ -110,10 +110,8 @@ function appendMessage(postData) {
     var messageId = extractMessageToken(postData);
     var senderId = extractSenderId(postData);
     var time = extractTimestamp(postData);
-    var text = extractTextFromMessage(postData);
+    var text = extractTextFromMessage(postData); 
     sheet.appendRow([event, messageId, senderId, time, text]);
-    //т.к. сбивается форматирование новой строки, установим его вручную
-    sheet.getRange(sheet.getLastRow(), 2, 1, 1).setNumberFormat('0');
     SpreadsheetApp.flush();
 }
 
@@ -206,13 +204,11 @@ function extractSenderId(postData) {
 }
 
 function extractMessageToken(postData) {
-    if (!postData) return undefined;
-
-    if (postData.message_token) { // Might be a message event
-        return parseInt(postData.message_token).toFixed();
-    }
-
-    return "0";
+    if (!postData || !postData.message_token) return undefined;
+  
+   var b = Number(postData.message_token).toFixed();
+  //escape symbol 'quotation'
+  return "\'" + String(b);
 }
 
 function extractTimestamp(postData) {
