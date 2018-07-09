@@ -48,7 +48,7 @@ function doPost(e) {
         storeMessage(postData);
 
         //зеркалирование сообщения
-        sendTextMessage("Я прочитал: " + extractTextFromMessage(postData), extractSenderId(postData));
+        //sendTextMessage("Я прочитал: " + extractTextFromMessage(postData), extractSenderId(postData));
 
 
     } catch (error) {
