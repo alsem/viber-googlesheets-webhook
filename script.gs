@@ -21,8 +21,7 @@ var gDefaultKeyboardColor = 'Your default keyboard option color from the paramet
 // noinspection UnusedStatementJS
 function isAcceptableEvent(postData) {
     return isConversationStartEvent(postData)
-        || (isMessageEvent(postData) && isTextMessage(postData))
-        || isSubscribedEvent(postData);
+        || (isMessageEvent(postData) && isTextMessage(postData));
 }
 
 // noinspection JSUnusedGlobalSymbols
